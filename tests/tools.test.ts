@@ -154,3 +154,72 @@ describe("MCP tools", () => {
     expect(JSON.parse(text)).toMatchObject({ saved_to: savePath, extension: "pdf" });
   });
 });
+
+describe("write gating", () => {
+  async function connectClient(options: { allowWrites?: boolean }): Promise<{
+    mcpClient: Client;
+    fetchFn: ReturnType<typeof vi.fn>;
+  }> {
+    const fetchFn = vi.fn();
+    const apiClient = new BaseLinkerClient({
+      token: "test-token",
+      fetchFn: fetchFn as unknown as typeof fetch,
+      limiter: { acquire: async () => {} },
+    });
+    const server = createServer(apiClient, allCategories, options);
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    const mcpClient = new Client({ name: "test-client", version: "1.0.0" });
+    await Promise.all([
+      server.connect(serverTransport),
+      mcpClient.connect(clientTransport),
+    ]);
+    return { mcpClient, fetchFn };
+  }
+
+  it("listToolsWhenWritesDisabledThenToolsAreMarkedReadOnly", async () => {
+    const { mcpClient } = await connectClient({ allowWrites: false });
+
+    const { tools } = await mcpClient.listTools();
+
+    for (const tool of tools) {
+      expect(tool.annotations?.readOnlyHint, tool.name).toBe(true);
+    }
+  });
+
+  it("callToolGivenWriteMethodWhenWritesDisabledThenRejects", async () => {
+    const { mcpClient, fetchFn } = await connectClient({ allowWrites: false });
+
+    const result = await mcpClient.callTool({
+      name: "baselinker_orders",
+      arguments: { method: "setOrderStatus", parameters: { order_id: 1, status_id: 2 } },
+    });
+
+    expect(result.isError).toBe(true);
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it("callToolGivenWriteMethodWhenWritesEnabledThenDispatchesToApiMethod", async () => {
+    const { mcpClient, fetchFn } = await connectClient({ allowWrites: true });
+    fetchFn.mockResolvedValue(jsonResponse({ status: "SUCCESS" }));
+
+    const result = await mcpClient.callTool({
+      name: "baselinker_orders",
+      arguments: { method: "setOrderStatus", parameters: { order_id: 1, status_id: 2 } },
+    });
+
+    expect(result.isError).toBeFalsy();
+    const body = new URLSearchParams(fetchFn.mock.calls[0][1].body);
+    expect(body.get("method")).toBe("setOrderStatus");
+    expect(JSON.parse(body.get("parameters")!)).toEqual({ order_id: 1, status_id: 2 });
+  });
+
+  it("listToolsWhenWritesEnabledThenToolsAreNotReadOnly", async () => {
+    const { mcpClient } = await connectClient({ allowWrites: true });
+
+    const { tools } = await mcpClient.listTools();
+
+    for (const tool of tools) {
+      expect(tool.annotations?.readOnlyHint, tool.name).toBe(false);
+    }
+  });
+});

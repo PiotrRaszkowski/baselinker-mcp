@@ -11,7 +11,7 @@ export const documentsCategory: CategoryDef = {
   toolName: "baselinker_documents",
   title: "BaseLinker Warehouse Documents",
   description:
-    "Read warehouse documents, purchase orders and fulfillment deliveries from BaseLinker storage.",
+    "Read warehouse documents, purchase orders and fulfillment deliveries from BaseLinker storage, and create them (documents, purchase orders, fulfillment deliveries) with their items, confirm/update their status and upload document files.",
   methods: [
     {
       name: "getInventoryDocuments",
@@ -152,6 +152,189 @@ export const documentsCategory: CategoryDef = {
         })
         .passthrough(),
       transformResult: fileArrayTransform("labels", "label"),
+    },
+    {
+      name: "addInventoryDocument",
+      description:
+        "Create a new inventory (warehouse) document as a draft awaiting confirmation.",
+      mode: "write",
+      schema: z
+        .object({
+          warehouse_id: z.number().describe("Source warehouse identifier"),
+          document_type: z
+            .number()
+            .describe("Document type: 0 GR, 1 IGR, 2 GI, 3 IGI, 4 IT, 5 OB"),
+          target_warehouse_id: z
+            .number()
+            .optional()
+            .describe("Destination warehouse ID; needed only for transfer documents"),
+          date_add: z
+            .number()
+            .optional()
+            .describe("Document creation date (unix timestamp); defaults to current date"),
+          date_execute: z
+            .number()
+            .optional()
+            .describe("Document execution date (unix timestamp); defaults to current date"),
+          contractor: z
+            .string()
+            .optional()
+            .describe("Contractor information or supplementary notes"),
+          invoice_no: z
+            .string()
+            .optional()
+            .describe("Associated invoice reference number"),
+          notes: z
+            .string()
+            .optional()
+            .describe("Additional document remarks or commentary"),
+        })
+        .passthrough(),
+    },
+    {
+      name: "addInventoryDocumentItems",
+      description: "Add items to an existing inventory document.",
+      mode: "write",
+      schema: z
+        .object({
+          document_id: z.number().describe("Inventory document identifier"),
+          items: z
+            .array(z.record(z.unknown()))
+            .describe(
+              "List of document items. Each: product_id (int, required), quantity (int, required), price (float, optional), location_name (string, optional), target_location_name (string, optional, internal transfer only), expiry_date (string YYYY-MM-DD, optional), batch (string, optional), serial_no (string, optional), comments (string, optional)",
+            ),
+        })
+        .passthrough(),
+    },
+    {
+      name: "addInventoryDocumentFile",
+      description:
+        "Attach an external PDF file to a warehouse document; the file is a base64-encoded string prefixed with 'data:'.",
+      mode: "write",
+      schema: z
+        .object({
+          document_id: z.number().describe("Warehouse document identifier from BaseLinker"),
+          file: z
+            .string()
+            .describe(
+              "Base64-encoded PDF file prefixed with 'data:' (e.g. 'data:4AAQSkZJRgABA[...]')",
+            ),
+          external_document_number: z
+            .string()
+            .describe("Reference number from the originating external system (max 100 chars)"),
+        })
+        .passthrough(),
+    },
+    {
+      name: "setInventoryDocumentStatusConfirmed",
+      description:
+        "Confirm a draft inventory document; this affects warehouse stock levels.",
+      mode: "write",
+      schema: z
+        .object({
+          document_id: z
+            .number()
+            .describe("Identifier of the inventory document to be confirmed"),
+        })
+        .passthrough(),
+    },
+    {
+      name: "addInventoryPurchaseOrder",
+      description:
+        "Create a new purchase order in the inventory system; it defaults to draft status.",
+      mode: "write",
+      schema: z
+        .object({
+          warehouse_id: z.number().describe("Warehouse identifier"),
+          supplier_id: z.number().describe("Supplier identifier"),
+          payer_id: z.number().describe("Payer identifier"),
+          currency: z.string().describe("Order currency (e.g. EUR, USD)"),
+          name: z
+            .string()
+            .optional()
+            .describe("Order designation (max 80 characters)"),
+          notes: z
+            .string()
+            .optional()
+            .describe("Order description or additional details"),
+          invoice_no: z
+            .string()
+            .optional()
+            .describe("Related invoice reference (max 50 characters)"),
+          date_delivery_expected: z
+            .number()
+            .optional()
+            .describe("Anticipated delivery date (unix timestamp)"),
+        })
+        .passthrough(),
+    },
+    {
+      name: "addInventoryPurchaseOrderItems",
+      description:
+        "Add items to an existing purchase order; matching positions are updated, differing ones are created.",
+      mode: "write",
+      schema: z
+        .object({
+          order_id: z.number().describe("Purchase order identifier"),
+          items: z
+            .array(z.record(z.unknown()))
+            .describe(
+              "List of items. Each: product_id (int, required), quantity (int, required), item_cost (float, required), supplier_code (string, optional), location (string, optional), batch (string, optional), expiry_date (string, optional), serial_no (string, optional), comments (string, optional)",
+            ),
+        })
+        .passthrough(),
+    },
+    {
+      name: "setInventoryPurchaseOrderStatus",
+      description: "Change the status assigned to a purchase order.",
+      mode: "write",
+      schema: z
+        .object({
+          order_id: z.number().describe("Purchase order identifier"),
+          status: z
+            .number()
+            .describe(
+              "New status: 0 draft, 1 sent, 2 received, 3 completed, 4 partially completed, 5 canceled, 6 received/not started",
+            ),
+          completed_items: z
+            .array(z.record(z.unknown()))
+            .optional()
+            .describe(
+              "List of received items. Each: item_id (int), completed_quantity (int)",
+            ),
+        })
+        .passthrough(),
+    },
+    {
+      name: "addInventoryFulfillmentDelivery",
+      description:
+        "Create a new draft fulfillment delivery shipping products from a source warehouse to a fulfillment center.",
+      mode: "write",
+      schema: z
+        .object({
+          warehouse_id: z.number().describe("Source warehouse identifier"),
+          fulfillment_warehouse_id: z
+            .number()
+            .describe("Fulfillment warehouse identifier receiving the goods"),
+          name: z.string().describe("Label for the delivery (max 80 characters)"),
+        })
+        .passthrough(),
+    },
+    {
+      name: "addInventoryFulfillmentDeliveryItems",
+      description:
+        "Add products to a draft fulfillment delivery.",
+      mode: "write",
+      schema: z
+        .object({
+          delivery_id: z.number().describe("Fulfillment delivery identifier receiving items"),
+          items: z
+            .array(z.record(z.unknown()))
+            .describe(
+              "List of products. Each: product_id (int, required), quantity (int, required)",
+            ),
+        })
+        .passthrough(),
     },
   ],
 };

@@ -11,7 +11,7 @@ export const courierCategory: CategoryDef = {
   toolName: "baselinker_courier",
   title: "BaseLinker Courier Shipments",
   description:
-    "Read courier and shipment data: couriers, accounts, shipment fields/services, packages, status history, labels, protocols and documents.",
+    "Read courier and shipment data: couriers, accounts, shipment fields/services, packages, status history, labels, protocols and documents. Also creates and deletes courier shipments and requests parcel pickups.",
   methods: [
     {
       name: "getCouriersList",
@@ -144,6 +144,112 @@ export const courierCategory: CategoryDef = {
       description: "Retrieve additional fields required for parcel pickup requests.",
       mode: "read",
       schema: z.object({ courier_code: z.string().describe("Courier code") }).passthrough(),
+    },
+    {
+      name: "createPackage",
+      description:
+        "Create a shipment in the selected courier's system. This creates a real shipment with the courier. Optional: account_id.",
+      mode: "write",
+      schema: z
+        .object({
+          order_id: z.number().describe("Order identifier"),
+          courier_code: z.string().describe("Courier code identifier"),
+          account_id: z
+            .number()
+            .optional()
+            .describe("Courier API account ID; defaults to the first account if omitted"),
+          fields: z
+            .array(z.record(z.unknown()))
+            .describe(
+              "Form fields from getCourierFields; checkboxes with multiple selections use separate array entries",
+            ),
+          packages: z
+            .array(z.record(z.unknown()))
+            .describe(
+              "Shipment list with dimensions (cm) and weight (kg); weight required for at least one shipment",
+            ),
+        })
+        .passthrough(),
+    },
+    {
+      name: "createPackageManual",
+      description:
+        "Attach shipping details (tracking number and courier) to an order for a shipment fulfilled outside BaseLinker. This creates a real shipment record with the courier. Optional: return_shipment.",
+      mode: "write",
+      schema: z
+        .object({
+          order_id: z.number().describe("Order identifier"),
+          courier_code: z
+            .string()
+            .describe("Courier code (from getCouriersList or a custom name)"),
+          package_number: z.string().describe("Tracking/consignment number"),
+          pickup_date: z.number().describe("Dispatch timestamp (Unix format)"),
+          return_shipment: z
+            .boolean()
+            .optional()
+            .describe("Whether the shipment is a return (defaults to false)"),
+        })
+        .passthrough(),
+    },
+    {
+      name: "deleteCourierPackage",
+      description:
+        "Permanently delete a shipment from both BaseLinker and the courier system. Provide package_id or package_number. Optional: force_delete.",
+      mode: "write",
+      schema: z
+        .object({
+          courier_code: z.string().describe("Courier identifier"),
+          package_id: z
+            .number()
+            .optional()
+            .describe("Internal shipment identifier (this or package_number is required)"),
+          package_number: z
+            .string()
+            .optional()
+            .describe("Tracking/consignment number (alternative to package_id)"),
+          force_delete: z
+            .boolean()
+            .optional()
+            .describe(
+              "Remove the shipment from the BaseLinker database if courier API deletion fails (defaults to false)",
+            ),
+        })
+        .passthrough()
+        .refine(
+          (params) => params.package_id !== undefined || params.package_number !== undefined,
+          { message: "Provide package_id or package_number" },
+        ),
+    },
+    {
+      name: "runRequestParcelPickup",
+      description:
+        "Request a parcel pickup from the courier for previously created shipments. Provide package_ids or package_numbers.",
+      mode: "write",
+      schema: z
+        .object({
+          courier_code: z.string().describe("Courier provider identifier"),
+          account_id: z
+            .number()
+            .describe("Courier API account ID (see getCourierAccounts)"),
+          package_ids: z
+            .array(z.number())
+            .optional()
+            .describe("Shipment IDs (this or package_numbers is required)"),
+          package_numbers: z
+            .array(z.string())
+            .optional()
+            .describe("Consignment numbers (alternative to package_ids)"),
+          fields: z
+            .array(z.record(z.unknown()))
+            .describe(
+              "Form fields from getRequestParcelPickupFields as key-value pairs",
+            ),
+        })
+        .passthrough()
+        .refine(
+          (params) => params.package_ids !== undefined || params.package_numbers !== undefined,
+          { message: "Provide package_ids or package_numbers" },
+        ),
     },
   ],
 };

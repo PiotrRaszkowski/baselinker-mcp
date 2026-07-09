@@ -2,7 +2,7 @@
 
 MCP (Model Context Protocol) server exposing the [BaseLinker API](https://api.baselinker.com/) to LLM clients such as Claude Code, Claude Desktop or Cursor.
 
-Currently **read-only**: all `get*` methods (87 methods) are available, grouped into 10 tools by BaseLinker's own API categories. Write methods (`add*`, `set*`, `delete*`, `update*`) are intentionally not exposed yet; the code structure supports adding them later behind a `BASELINKER_ALLOW_WRITES` flag.
+**Read-only by default**: the 87 `get*` methods are always available, grouped into 10 tools by BaseLinker's own API categories. The 92 write methods (`add*`, `set*`, `delete*`, `update*`, `create*`, `run*`) are exposed only when `BASELINKER_ALLOW_WRITES=true` — see [Write methods](#write-methods). With writes disabled, every tool advertises `readOnlyHint: true`.
 
 ## Requirements
 
@@ -51,18 +51,30 @@ claude mcp add baselinker -e BASELINKER_API_TOKEN=your-token -- node /path/to/ba
 
 Each tool takes a `method` (enum) and a `parameters` object. Method-specific parameters are validated and documented in the tool description.
 
-| Tool | Scope | Methods |
+The method counts below are `read + write`; write methods are only listed/callable when `BASELINKER_ALLOW_WRITES=true`.
+
+| Tool | Scope | Methods (read + write) |
 |---|---|---|
-| `baselinker_orders` | Orders, statuses, payments, journal, PickPack carts | 15 |
-| `baselinker_invoices` | Invoices, invoice files, numbering series, receipts | 6 |
-| `baselinker_returns` | Order returns, statuses, reasons, payments, journal | 8 |
-| `baselinker_courier` | Couriers, packages, labels, protocols, documents | 11 |
-| `baselinker_crm` | CRM clients and statuses | 5 |
-| `baselinker_inventory` | Catalogs, warehouses, locations, categories, manufacturers, suppliers, payers, tags | 18 |
-| `baselinker_products` | Product lists, data, stock, prices, logs | 5 |
-| `baselinker_documents` | Warehouse documents, purchase orders, fulfillment deliveries | 10 |
-| `baselinker_connect` | Base Connect integrations and contractor credit | 3 |
-| `baselinker_external_storage` | External storages (shops, wholesalers) | 6 |
+| `baselinker_orders` | Orders, statuses, payments, journal, PickPack carts | 15 + 22 |
+| `baselinker_invoices` | Invoices, invoice files, numbering series, receipts | 6 + 6 |
+| `baselinker_returns` | Order returns, statuses, reasons, payments, journal | 8 + 13 |
+| `baselinker_courier` | Couriers, packages, labels, protocols, documents | 11 + 4 |
+| `baselinker_crm` | CRM clients and statuses | 5 + 6 |
+| `baselinker_inventory` | Catalogs, warehouses, locations, categories, manufacturers, suppliers, payers, tags | 18 + 24 |
+| `baselinker_products` | Product lists, data, stock, prices, logs | 5 + 5 |
+| `baselinker_documents` | Warehouse documents, purchase orders, fulfillment deliveries | 10 + 9 |
+| `baselinker_connect` | Base Connect integrations and contractor credit | 3 + 2 |
+| `baselinker_external_storage` | External storages (shops, wholesalers) | 6 + 1 |
+
+### Write methods
+
+Write methods are **disabled by default**. To enable them, set:
+
+```
+BASELINKER_ALLOW_WRITES=true
+```
+
+When disabled, write methods are neither listed in any tool's `method` enum nor callable, and every tool reports `readOnlyHint: true`. When enabled, all 92 write methods become available — creating, updating and deleting orders, products, stock, prices, invoices, shipments, returns, warehouse documents and more. These operate on live BaseLinker data (and can trigger real courier shipments or delete records), so enable writes only for trusted clients.
 
 ### Pagination
 

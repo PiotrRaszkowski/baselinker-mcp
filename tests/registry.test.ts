@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { allCategories } from "../src/categories/index.js";
 
+const WRITE_PREFIXES = ["add", "set", "delete", "update", "create", "run"];
+
 const FILE_METHODS = [
   "getLabel",
   "getProtocol",
@@ -19,10 +21,12 @@ describe("category registry", () => {
     expect(new Set(names).size).toBe(names.length);
   });
 
-  it("methodsWhenInspectedThenAllAreReadOnly", () => {
-    const writeMethods = allMethods.filter((method) => method.mode !== "read");
+  it("methodsWhenInspectedThenEachHasReadOrWriteMode", () => {
+    const invalidModes = allMethods.filter(
+      (method) => method.mode !== "read" && method.mode !== "write",
+    );
 
-    expect(writeMethods).toEqual([]);
+    expect(invalidModes).toEqual([]);
   });
 
   it("methodsWhenInspectedThenAllHaveNonEmptyDescriptions", () => {
@@ -33,10 +37,20 @@ describe("category registry", () => {
     expect(withoutDescription).toEqual([]);
   });
 
-  it("methodNamesWhenInspectedThenAllAreGetters", () => {
-    const nonGetters = allMethods.filter((method) => !method.name.startsWith("get"));
+  it("readMethodNamesWhenInspectedThenAllAreGetters", () => {
+    const nonGetterReads = allMethods
+      .filter((method) => method.mode === "read")
+      .filter((method) => !method.name.startsWith("get"));
 
-    expect(nonGetters).toEqual([]);
+    expect(nonGetterReads).toEqual([]);
+  });
+
+  it("writeMethodNamesWhenInspectedThenAllUseMutatingPrefixes", () => {
+    const nonMutatingWrites = allMethods
+      .filter((method) => method.mode === "write")
+      .filter((method) => !WRITE_PREFIXES.some((prefix) => method.name.startsWith(prefix)));
+
+    expect(nonMutatingWrites).toEqual([]);
   });
 
   it("fileMethodsWhenInspectedThenAllHaveTransformResult", () => {
@@ -58,7 +72,12 @@ describe("category registry", () => {
   });
 
   it("categoriesWhenCountedThenCoverAllExpectedMethods", () => {
+    const readMethods = allMethods.filter((method) => method.mode === "read");
+    const writeMethods = allMethods.filter((method) => method.mode === "write");
+
     expect(allCategories).toHaveLength(10);
-    expect(allMethods).toHaveLength(87);
+    expect(readMethods).toHaveLength(87);
+    expect(writeMethods).toHaveLength(92);
+    expect(allMethods).toHaveLength(179);
   });
 });

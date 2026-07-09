@@ -9,7 +9,7 @@ export const externalStorageCategory: CategoryDef = {
   toolName: "baselinker_external_storage",
   title: "BaseLinker External Storages",
   description:
-    "Read products, prices, stock and categories from external storages (shops, wholesalers) connected to BaseLinker.",
+    "Read products, prices, stock and categories from external storages (shops, wholesalers) connected to BaseLinker, and update external storage stock quantities.",
   methods: [
     {
       name: "getExternalStoragesList",
@@ -90,6 +90,22 @@ export const externalStorageCategory: CategoryDef = {
         .object({
           storage_id: storageIdSchema,
           page: z.number().optional().describe("Results page number"),
+        })
+        .passthrough(),
+    },
+    {
+      name: "updateExternalStorageProductsQuantity",
+      description:
+        "Update product stock quantities in an external shop or wholesaler storage. The products payload is an array of [product_id, variant_id, stock] tuples, with a maximum of 1000 products per request.",
+      mode: "write",
+      schema: z
+        .object({
+          storage_id: storageIdSchema,
+          products: z
+            .array(z.array(z.union([z.string(), z.number()])))
+            .describe(
+              "Array of stock updates, each a [product_id, variant_id, stock] tuple (variant_id 0 for the main product); max 1000 products per request",
+            ),
         })
         .passthrough(),
     },
