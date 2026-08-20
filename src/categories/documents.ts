@@ -26,30 +26,18 @@ export const documentsCategory: CategoryDef = {
             .describe(
               "Source object type: 1 order, 2 purchase order, 3 stock take, 4 order return, 7 fulfillment delivery, 8 transfer",
             ),
-          filter_source_object_id: z
-            .number()
-            .optional()
-            .describe("Source object identifier"),
-          filter_document_id: z
-            .number()
-            .optional()
-            .describe("Specific inventory document ID"),
+          filter_source_object_id: z.number().optional().describe("Source object identifier"),
+          filter_document_id: z.number().optional().describe("Specific inventory document ID"),
           filter_document_type: z
             .number()
             .optional()
             .describe("Document type: 0 GR, 1 IGR, 2 GI, 3 IGI, 4 IT, 5 OB"),
-          filter_document_status: z
-            .number()
-            .optional()
-            .describe("Status: 0 draft, 1 confirmed"),
+          filter_document_status: z.number().optional().describe("Status: 0 draft, 1 confirmed"),
           filter_date_from: z
             .number()
             .optional()
             .describe("Minimum creation date (unix timestamp)"),
-          filter_date_to: z
-            .number()
-            .optional()
-            .describe("Maximum creation date (unix timestamp)"),
+          filter_date_to: z.number().optional().describe("Maximum creation date (unix timestamp)"),
           filter_warehouse_id: z.number().optional().describe("Warehouse identifier"),
           page: z.number().optional().describe("Results page (1-based, 100 per page)"),
         })
@@ -60,9 +48,7 @@ export const documentsCategory: CategoryDef = {
       description:
         "Retrieve items of a specific inventory document. 100 per page via the page parameter.",
       mode: "read",
-      schema: z
-        .object({ document_id: z.number().describe("Inventory document ID") })
-        .passthrough(),
+      schema: z.object({ document_id: z.number().describe("Inventory document ID") }).passthrough(),
     },
     {
       name: "getInventoryDocumentFile",
@@ -86,8 +72,7 @@ export const documentsCategory: CategoryDef = {
     },
     {
       name: "getInventoryPurchaseOrders",
-      description:
-        "Retrieve purchase orders. 100 per page; use the page parameter.",
+      description: "Retrieve purchase orders. 100 per page; use the page parameter.",
       mode: "read",
       schema: z
         .object({
@@ -155,15 +140,12 @@ export const documentsCategory: CategoryDef = {
     },
     {
       name: "addInventoryDocument",
-      description:
-        "Create a new inventory (warehouse) document as a draft awaiting confirmation.",
+      description: "Create a new inventory (warehouse) document as a draft awaiting confirmation.",
       mode: "write",
       schema: z
         .object({
           warehouse_id: z.number().describe("Source warehouse identifier"),
-          document_type: z
-            .number()
-            .describe("Document type: 0 GR, 1 IGR, 2 GI, 3 IGI, 4 IT, 5 OB"),
+          document_type: z.number().describe("Document type: 0 GR, 1 IGR, 2 GI, 3 IGI, 4 IT, 5 OB"),
           target_warehouse_id: z
             .number()
             .optional()
@@ -180,14 +162,8 @@ export const documentsCategory: CategoryDef = {
             .string()
             .optional()
             .describe("Contractor information or supplementary notes"),
-          invoice_no: z
-            .string()
-            .optional()
-            .describe("Associated invoice reference number"),
-          notes: z
-            .string()
-            .optional()
-            .describe("Additional document remarks or commentary"),
+          invoice_no: z.string().optional().describe("Associated invoice reference number"),
+          notes: z.string().optional().describe("Additional document remarks or commentary"),
         })
         .passthrough(),
     },
@@ -227,14 +203,11 @@ export const documentsCategory: CategoryDef = {
     },
     {
       name: "setInventoryDocumentStatusConfirmed",
-      description:
-        "Confirm a draft inventory document; this affects warehouse stock levels.",
+      description: "Confirm a draft inventory document; this affects warehouse stock levels.",
       mode: "write",
       schema: z
         .object({
-          document_id: z
-            .number()
-            .describe("Identifier of the inventory document to be confirmed"),
+          document_id: z.number().describe("Identifier of the inventory document to be confirmed"),
         })
         .passthrough(),
     },
@@ -249,14 +222,8 @@ export const documentsCategory: CategoryDef = {
           supplier_id: z.number().describe("Supplier identifier"),
           payer_id: z.number().describe("Payer identifier"),
           currency: z.string().describe("Order currency (e.g. EUR, USD)"),
-          name: z
-            .string()
-            .optional()
-            .describe("Order designation (max 80 characters)"),
-          notes: z
-            .string()
-            .optional()
-            .describe("Order description or additional details"),
+          name: z.string().optional().describe("Order designation (max 80 characters)"),
+          notes: z.string().optional().describe("Order description or additional details"),
           invoice_no: z
             .string()
             .optional()
@@ -299,9 +266,7 @@ export const documentsCategory: CategoryDef = {
           completed_items: z
             .array(z.record(z.unknown()))
             .optional()
-            .describe(
-              "List of received items. Each: item_id (int), completed_quantity (int)",
-            ),
+            .describe("List of received items. Each: item_id (int), completed_quantity (int)"),
         })
         .passthrough(),
     },
@@ -322,8 +287,7 @@ export const documentsCategory: CategoryDef = {
     },
     {
       name: "addInventoryFulfillmentDeliveryItems",
-      description:
-        "Add products to a draft fulfillment delivery.",
+      description: "Add products to a draft fulfillment delivery.",
       mode: "write",
       schema: z
         .object({

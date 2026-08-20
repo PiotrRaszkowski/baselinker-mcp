@@ -105,10 +105,7 @@ export const ordersCategory: CategoryDef = {
       schema: z
         .object({
           last_log_id: z.number().optional().describe("Log ID to start retrieval from"),
-          logs_types: z
-            .array(z.number())
-            .optional()
-            .describe("List of event type IDs to filter"),
+          logs_types: z.array(z.number()).optional().describe("List of event type IDs to filter"),
           order_id: z.number().optional().describe("Retrieve logs for a specific order only"),
         })
         .passthrough(),
@@ -128,8 +125,7 @@ export const ordersCategory: CategoryDef = {
     },
     {
       name: "getOrderPaymentsHistory",
-      description:
-        "Retrieve payment history for a selected order. Optional: show_full_history.",
+      description: "Retrieve payment history for a selected order. Optional: show_full_history.",
       mode: "read",
       schema: z.object({ order_id: z.number().describe("Order identifier") }).passthrough(),
     },
@@ -169,9 +165,7 @@ export const ordersCategory: CategoryDef = {
       mode: "write",
       schema: z
         .object({
-          order_status_id: z
-            .number()
-            .describe("Order status identifier (see getOrderStatusList)"),
+          order_status_id: z.number().describe("Order status identifier (see getOrderStatusList)"),
           custom_source_id: z
             .number()
             .optional()
@@ -185,14 +179,8 @@ export const ordersCategory: CategoryDef = {
           paid: z
             .boolean()
             .describe("Payment completion status; true adds a full payment to the order"),
-          user_comments: z
-            .string()
-            .optional()
-            .describe("Buyer comments (max 510 characters)"),
-          admin_comments: z
-            .string()
-            .optional()
-            .describe("Seller comments (max 200 characters)"),
+          user_comments: z.string().optional().describe("Buyer comments (max 510 characters)"),
+          admin_comments: z.string().optional().describe("Seller comments (max 200 characters)"),
           email: z.string().describe("Buyer email address"),
           phone: z.string().describe("Buyer phone number"),
           user_login: z.string().optional().describe("Allegro or eBay username"),
@@ -204,22 +192,11 @@ export const ordersCategory: CategoryDef = {
           delivery_postcode: z.string().describe("Delivery postal code"),
           delivery_city: z.string().describe("Delivery city"),
           delivery_state: z.string().optional().describe("Delivery state or province"),
-          delivery_country_code: z
-            .string()
-            .describe("Two-letter delivery country code"),
-          delivery_point_id: z
-            .string()
-            .optional()
-            .describe("Pickup point identifier"),
+          delivery_country_code: z.string().describe("Two-letter delivery country code"),
+          delivery_point_id: z.string().optional().describe("Pickup point identifier"),
           delivery_point_name: z.string().optional().describe("Pickup point name"),
-          delivery_point_address: z
-            .string()
-            .optional()
-            .describe("Pickup point street address"),
-          delivery_point_postcode: z
-            .string()
-            .optional()
-            .describe("Pickup point postal code"),
+          delivery_point_address: z.string().optional().describe("Pickup point street address"),
+          delivery_point_postcode: z.string().optional().describe("Pickup point postal code"),
           delivery_point_city: z.string().optional().describe("Pickup point city"),
           invoice_fullname: z.string().optional().describe("Billing name and surname"),
           invoice_company: z.string().optional().describe("Billing company name"),
@@ -228,22 +205,10 @@ export const ordersCategory: CategoryDef = {
           invoice_postcode: z.string().optional().describe("Billing postal code"),
           invoice_city: z.string().optional().describe("Billing city"),
           invoice_state: z.string().optional().describe("Billing state or province"),
-          invoice_country_code: z
-            .string()
-            .optional()
-            .describe("Two-letter billing country code"),
-          want_invoice: z
-            .boolean()
-            .optional()
-            .describe("Whether the buyer requested an invoice"),
-          extra_field_1: z
-            .string()
-            .optional()
-            .describe("Custom seller-defined field 1"),
-          extra_field_2: z
-            .string()
-            .optional()
-            .describe("Custom seller-defined field 2"),
+          invoice_country_code: z.string().optional().describe("Two-letter billing country code"),
+          want_invoice: z.boolean().optional().describe("Whether the buyer requested an invoice"),
+          extra_field_1: z.string().optional().describe("Custom seller-defined field 1"),
+          extra_field_2: z.string().optional().describe("Custom seller-defined field 2"),
           custom_extra_fields: z
             .record(z.unknown())
             .optional()
@@ -264,9 +229,7 @@ export const ordersCategory: CategoryDef = {
           order_id: z.number().describe("Identifier of the order being split"),
           items_to_split: z
             .array(z.record(z.unknown()))
-            .describe(
-              "Products to move to the new order, each with order_product_id and quantity",
-            ),
+            .describe("Products to move to the new order, each with order_product_id and quantity"),
           delivery_cost_to_split: z
             .number()
             .optional()
@@ -292,9 +255,7 @@ export const ordersCategory: CategoryDef = {
       mode: "write",
       schema: z
         .object({
-          order_ids: z
-            .array(z.number())
-            .describe("Order IDs to delete (max 1000 per call)"),
+          order_ids: z.array(z.number()).describe("Order IDs to delete (max 1000 per call)"),
         })
         .passthrough(),
     },
@@ -306,34 +267,16 @@ export const ordersCategory: CategoryDef = {
       schema: z
         .object({
           order_id: z.number().describe("Order identifier"),
-          admin_comments: z
-            .string()
-            .optional()
-            .describe("Seller comments (max 200 characters)"),
-          user_comments: z
-            .string()
-            .optional()
-            .describe("Buyer comments (max 510 characters)"),
-          payment_method: z
-            .string()
-            .optional()
-            .describe("Payment method name (max 30 characters)"),
+          admin_comments: z.string().optional().describe("Seller comments (max 200 characters)"),
+          user_comments: z.string().optional().describe("Buyer comments (max 510 characters)"),
+          payment_method: z.string().optional().describe("Payment method name (max 30 characters)"),
           payment_method_cod: z
             .boolean()
             .optional()
             .describe("Whether the payment method is cash on delivery (COD)"),
-          email: z
-            .string()
-            .optional()
-            .describe("Buyer email address (max 150 characters)"),
-          phone: z
-            .string()
-            .optional()
-            .describe("Buyer phone number (max 100 characters)"),
-          user_login: z
-            .string()
-            .optional()
-            .describe("Buyer login (max 30 characters)"),
+          email: z.string().optional().describe("Buyer email address (max 150 characters)"),
+          phone: z.string().optional().describe("Buyer phone number (max 100 characters)"),
+          user_login: z.string().optional().describe("Buyer login (max 30 characters)"),
           delivery_method: z
             .string()
             .optional()
@@ -355,18 +298,12 @@ export const ordersCategory: CategoryDef = {
             .string()
             .optional()
             .describe("Delivery postal code (max 100 characters)"),
-          delivery_city: z
-            .string()
-            .optional()
-            .describe("Delivery city (max 100 characters)"),
+          delivery_city: z.string().optional().describe("Delivery city (max 100 characters)"),
           delivery_state: z
             .string()
             .optional()
             .describe("Delivery state or province (max 35 characters)"),
-          delivery_country_code: z
-            .string()
-            .optional()
-            .describe("Two-letter delivery country code"),
+          delivery_country_code: z.string().optional().describe("Two-letter delivery country code"),
           delivery_point_id: z
             .string()
             .optional()
@@ -407,22 +344,13 @@ export const ordersCategory: CategoryDef = {
             .string()
             .optional()
             .describe("Billing postal code (max 20 characters)"),
-          invoice_city: z
-            .string()
-            .optional()
-            .describe("Billing city (max 100 characters)"),
+          invoice_city: z.string().optional().describe("Billing city (max 100 characters)"),
           invoice_state: z
             .string()
             .optional()
             .describe("Billing state or province (max 35 characters)"),
-          invoice_country_code: z
-            .string()
-            .optional()
-            .describe("Two-letter billing country code"),
-          want_invoice: z
-            .boolean()
-            .optional()
-            .describe("Whether the buyer requested an invoice"),
+          invoice_country_code: z.string().optional().describe("Two-letter billing country code"),
+          want_invoice: z.boolean().optional().describe("Whether the buyer requested an invoice"),
           extra_field_1: z
             .string()
             .optional()
@@ -435,18 +363,9 @@ export const ordersCategory: CategoryDef = {
             .record(z.unknown())
             .optional()
             .describe("Order custom extra fields keyed by field ID"),
-          pick_state: z
-            .number()
-            .optional()
-            .describe("Product collection (pick) status flag"),
-          pack_state: z
-            .number()
-            .optional()
-            .describe("Product packing status flag"),
-          star: z
-            .number()
-            .optional()
-            .describe("Order rating from 0 to 5 (0 means no star)"),
+          pick_state: z.number().optional().describe("Product collection (pick) status flag"),
+          pack_state: z.number().optional().describe("Product packing status flag"),
+          star: z.number().optional().describe("Order rating from 0 to 5 (0 means no star)"),
         })
         .passthrough(),
     },
@@ -483,21 +402,14 @@ export const ordersCategory: CategoryDef = {
       schema: z
         .object({
           order_id: z.number().describe("Order identifier"),
-          storage: z
-            .string()
-            .describe('Product source storage type: "db", "shop" or "warehouse"'),
-          storage_id: z
-            .string()
-            .describe("Identifier of the inventory, shop or warehouse source"),
+          storage: z.string().describe('Product source storage type: "db", "shop" or "warehouse"'),
+          storage_id: z.string().describe("Identifier of the inventory, shop or warehouse source"),
           product_id: z
             .string()
             .optional()
             .describe("Product identifier in BaseLinker or shop storage"),
           variant_id: z.string().optional().describe("Product variant identifier"),
-          auction_id: z
-            .string()
-            .optional()
-            .describe("Listing ID for eBay/Allegro orders"),
+          auction_id: z.string().optional().describe("Listing ID for eBay/Allegro orders"),
           name: z.string().optional().describe("Product name"),
           sku: z.string().optional().describe("Product SKU number"),
           ean: z.string().optional().describe("Product EAN number"),
@@ -530,9 +442,7 @@ export const ordersCategory: CategoryDef = {
       schema: z
         .object({
           order_id: z.number().describe("Order identifier"),
-          order_product_id: z
-            .number()
-            .describe("Identifier of the order item to remove"),
+          order_product_id: z.number().describe("Identifier of the order item to remove"),
         })
         .passthrough(),
     },
@@ -544,9 +454,7 @@ export const ordersCategory: CategoryDef = {
       schema: z
         .object({
           order_id: z.number().describe("Order identifier"),
-          order_product_id: z
-            .number()
-            .describe("Identifier of the order item to update"),
+          order_product_id: z.number().describe("Identifier of the order item to update"),
           storage: z
             .string()
             .optional()
@@ -560,10 +468,7 @@ export const ordersCategory: CategoryDef = {
             .optional()
             .describe("Product identifier in BaseLinker or shop storage"),
           variant_id: z.string().optional().describe("Product variant identifier"),
-          auction_id: z
-            .string()
-            .optional()
-            .describe("Listing ID for eBay/Allegro orders"),
+          auction_id: z.string().optional().describe("Listing ID for eBay/Allegro orders"),
           name: z.string().optional().describe("Product name"),
           sku: z.string().optional().describe("Product SKU number"),
           ean: z.string().optional().describe("Product EAN number"),
@@ -597,12 +502,8 @@ export const ordersCategory: CategoryDef = {
           payment_done: z
             .number()
             .describe("Payment amount that replaces the current payment total"),
-          payment_date: z
-            .number()
-            .describe("Payment date as a Unix timestamp"),
-          payment_comment: z
-            .string()
-            .describe("Payment note (max 30 characters)"),
+          payment_date: z.number().describe("Payment date as a Unix timestamp"),
+          payment_comment: z.string().describe("Payment note (max 30 characters)"),
           external_payment_id: z
             .string()
             .optional()
@@ -621,12 +522,8 @@ export const ordersCategory: CategoryDef = {
             .number()
             .optional()
             .describe("ID of the status to update; omit to create a new status"),
-          name: z
-            .string()
-            .describe("Status name shown in the seller panel (max 30 characters)"),
-          short_name: z
-            .string()
-            .describe("Abbreviated status name (max 17 characters)"),
+          name: z.string().describe("Status name shown in the seller panel (max 30 characters)"),
+          short_name: z.string().describe("Abbreviated status name (max 17 characters)"),
           name_for_customer: z
             .string()
             .optional()
@@ -698,9 +595,7 @@ export const ordersCategory: CategoryDef = {
       schema: z
         .object({
           order_id: z.number().describe("Order identifier"),
-          status_id: z
-            .number()
-            .describe("New status ID (see getOrderStatusList)"),
+          status_id: z.number().describe("New status ID (see getOrderStatusList)"),
         })
         .passthrough(),
     },
@@ -758,9 +653,7 @@ export const ordersCategory: CategoryDef = {
       description:
         "Permanently delete a PickPack cart; all order assignments to that cart are cleared.",
       mode: "write",
-      schema: z
-        .object({ cart_id: z.number().describe("Cart identifier to delete") })
-        .passthrough(),
+      schema: z.object({ cart_id: z.number().describe("Cart identifier to delete") }).passthrough(),
     },
     {
       name: "deletePickPackCartOrders",
@@ -792,9 +685,7 @@ export const ordersCategory: CategoryDef = {
       schema: z
         .object({
           order_id: z.number().describe("Order identifier"),
-          trigger_id: z
-            .number()
-            .describe("Identifier of the personal trigger to run"),
+          trigger_id: z.number().describe("Identifier of the personal trigger to run"),
         })
         .passthrough(),
     },

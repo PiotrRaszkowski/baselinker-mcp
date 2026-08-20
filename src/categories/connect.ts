@@ -42,24 +42,24 @@ export const connectCategory: CategoryDef = {
           connect_contractor_id: z
             .number()
             .describe(
-              "Contractor ID. The list of contractor identifiers can be retrieved using the getConnectIntegrationContractors method"
+              "Contractor ID. The list of contractor identifiers can be retrieved using the getConnectIntegrationContractors method",
             ),
           amount: z
             .number()
             .describe(
-              "Settlement amount. Must be a positive value and cannot exceed the contractor's currently blocked credit amount (credit_to_pay)"
+              "Settlement amount. Must be a positive value and cannot exceed the contractor's currently blocked credit amount (credit_to_pay)",
             ),
           message: z
             .string()
             .optional()
             .describe(
-              "Settlement note/comment describing the repayment, e.g., payment reference, bank transfer ID, etc. Maximum 255 characters"
+              "Settlement note/comment describing the repayment, e.g., payment reference, bank transfer ID, etc. Maximum 255 characters",
             ),
           order_id: z
             .number()
             .optional()
             .describe(
-              "Related order reference; use 0 or omit if the settlement isn't tied to a specific transaction"
+              "Related order reference; use 0 or omit if the settlement isn't tied to a specific transaction",
             ),
         })
         .passthrough(),

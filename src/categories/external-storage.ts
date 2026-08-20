@@ -48,10 +48,7 @@ export const externalStorageCategory: CategoryDef = {
           filter_price_to: z.number().optional().describe("Maximum price"),
           filter_quantity_from: z.number().optional().describe("Minimum stock quantity"),
           filter_quantity_to: z.number().optional().describe("Maximum stock quantity"),
-          filter_available: z
-            .number()
-            .optional()
-            .describe("Available (1), unavailable (0) or all"),
+          filter_available: z.number().optional().describe("Available (1), unavailable (0) or all"),
           page: z.number().optional().describe("Results page number"),
         })
         .passthrough(),

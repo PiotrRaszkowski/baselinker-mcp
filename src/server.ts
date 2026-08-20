@@ -7,6 +7,7 @@ import { errorResult, jsonResult, SAVE_TO_PATH_PARAM } from "./result.js";
 
 export interface ServerOptions {
   allowWrites?: boolean;
+  allowLocalFileWrites?: boolean;
 }
 
 export function createServer(
@@ -16,7 +17,7 @@ export function createServer(
 ): McpServer {
   const server = new McpServer({
     name: "baselinker-mcp",
-    version: "0.1.0",
+    version: "0.2.0",
   });
   for (const category of categories) {
     registerCategoryTool(server, client, category, options);
@@ -56,8 +57,25 @@ function registerCategoryTool(
       if (methodDef === undefined) {
         return errorResult(`Unknown method: ${method}`);
       }
-      return executeMethod(client, methodDef, parameters ?? {});
+      const requestParams = parameters ?? {};
+      if (rejectsLocalFileWrite(requestParams, options)) {
+        return errorResult(
+          `"${SAVE_TO_PATH_PARAM}" is not available on this server — it would write to the server's ` +
+            "filesystem, not yours. Omit it and the file is returned as an embedded resource.",
+        );
+      }
+      return executeMethod(client, methodDef, requestParams);
     },
+  );
+}
+
+function rejectsLocalFileWrite(
+  parameters: Record<string, unknown>,
+  options: ServerOptions,
+): boolean {
+  const savePath = parameters[SAVE_TO_PATH_PARAM];
+  return (
+    options.allowLocalFileWrites === false && typeof savePath === "string" && savePath.length > 0
   );
 }
 
@@ -90,9 +108,7 @@ function stripSyntheticParams(params: Record<string, unknown>): Record<string, u
 }
 
 function buildDescription(category: CategoryDef, methods: MethodDef[]): string {
-  const methodLines = methods
-    .map((method) => `- ${method.name}: ${method.description}`)
-    .join("\n");
+  const methodLines = methods.map((method) => `- ${method.name}: ${method.description}`).join("\n");
   return `${category.description}\n\nResponses can be large — use filters and pagination parameters where available.\n\nAvailable methods:\n${methodLines}`;
 }
 

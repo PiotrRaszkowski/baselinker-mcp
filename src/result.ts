@@ -117,11 +117,7 @@ async function saveToFile(
   };
 }
 
-function embeddedResource(
-  base64: string,
-  extension: string,
-  fieldName: string,
-): CallToolResult {
+function embeddedResource(base64: string, extension: string, fieldName: string): CallToolResult {
   const mimeType = MIME_TYPES[extension.toLowerCase()] ?? "application/octet-stream";
   return {
     content: [

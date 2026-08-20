@@ -48,12 +48,8 @@ export const inventoryCategory: CategoryDef = {
       mode: "read",
       schema: z
         .object({
-          warehouse_id: z
-            .number()
-            .describe("Warehouse identifier (see getInventoryWarehouses)"),
-          warehouse_type: z
-            .string()
-            .describe("Warehouse type (see getInventoryWarehouses)"),
+          warehouse_id: z.number().describe("Warehouse identifier (see getInventoryWarehouses)"),
+          warehouse_type: z.string().describe("Warehouse type (see getInventoryWarehouses)"),
         })
         .passthrough(),
     },
@@ -151,9 +147,7 @@ export const inventoryCategory: CategoryDef = {
             .describe("Catalog identifier; reuse an existing ID to update, omit to create"),
           name: z.string().describe("Catalog display name (max 100 characters)"),
           description: z.string().optional().describe("Detailed catalog description"),
-          languages: z
-            .array(z.string())
-            .describe("Supported language codes for the catalog"),
+          languages: z.array(z.string()).describe("Supported language codes for the catalog"),
           default_language: z
             .string()
             .describe("Primary language (2-char code); must be included in languages"),
@@ -169,9 +163,7 @@ export const inventoryCategory: CategoryDef = {
           default_warehouse: z
             .string()
             .describe("Primary warehouse; must be in warehouses (max 30 characters)"),
-          reservations: z
-            .boolean()
-            .describe("Whether the catalog supports inventory reservations"),
+          reservations: z.boolean().describe("Whether the catalog supports inventory reservations"),
         })
         .passthrough(),
     },
@@ -244,8 +236,7 @@ export const inventoryCategory: CategoryDef = {
     },
     {
       name: "addInventoryWarehouse",
-      description:
-        "Create a new warehouse or update an existing one when warehouse_id is passed.",
+      description: "Create a new warehouse or update an existing one when warehouse_id is passed.",
       mode: "write",
       schema: z
         .object({
@@ -259,10 +250,7 @@ export const inventoryCategory: CategoryDef = {
             .boolean()
             .optional()
             .describe("Whether manual stock adjustments are allowed; false restricts edits to API"),
-          country: z
-            .string()
-            .optional()
-            .describe("ISO 3166-1 2-letter country code (e.g. DE, PL)"),
+          country: z.string().optional().describe("ISO 3166-1 2-letter country code (e.g. DE, PL)"),
           address: z.string().optional().describe("Warehouse street address (max 200 characters)"),
           postcode: z.string().optional().describe("Warehouse postal code (max 20 characters)"),
           city: z.string().optional().describe("Warehouse city (max 80 characters)"),
@@ -274,9 +262,7 @@ export const inventoryCategory: CategoryDef = {
       description:
         "Permanently delete a warehouse from BaseLinker inventories. This cannot be undone.",
       mode: "write",
-      schema: z
-        .object({ warehouse_id: z.number().describe("ID of the warehouse") })
-        .passthrough(),
+      schema: z.object({ warehouse_id: z.number().describe("ID of the warehouse") }).passthrough(),
     },
     {
       name: "addInventoryWarehouseLocation",
@@ -289,12 +275,8 @@ export const inventoryCategory: CategoryDef = {
             .number()
             .optional()
             .describe("Location ID to update; omit to create a new location"),
-          warehouse_id: z
-            .number()
-            .describe("Warehouse identifier (see getInventoryWarehouses)"),
-          warehouse_type: z
-            .string()
-            .describe("Warehouse type (see getInventoryWarehouses)"),
+          warehouse_id: z.number().describe("Warehouse identifier (see getInventoryWarehouses)"),
+          warehouse_type: z.string().describe("Warehouse type (see getInventoryWarehouses)"),
           name: z
             .string()
             .optional()
@@ -311,10 +293,7 @@ export const inventoryCategory: CategoryDef = {
             .number()
             .optional()
             .describe("Picking priority 1..99999; lower values are picked first"),
-          location_type_id: z
-            .number()
-            .optional()
-            .describe("Existing location type identifier"),
+          location_type_id: z.number().optional().describe("Existing location type identifier"),
           zone_id: z.number().optional().describe("Zone identifier; pass 0 for unassigned"),
           rack_id: z.number().optional().describe("Rack identifier; pass 0 for unassigned"),
         })
@@ -349,23 +328,20 @@ export const inventoryCategory: CategoryDef = {
           is_transfer_bin: z
             .boolean()
             .optional()
-            .describe("Whether the location serves as an intermediate transfer point (default false)"),
+            .describe(
+              "Whether the location serves as an intermediate transfer point (default false)",
+            ),
         })
         .passthrough(),
     },
     {
       name: "deleteInventoryWarehouseLocation",
-      description:
-        "Permanently delete a single warehouse location. This cannot be undone.",
+      description: "Permanently delete a single warehouse location. This cannot be undone.",
       mode: "write",
       schema: z
         .object({
-          warehouse_id: z
-            .number()
-            .describe("Warehouse identifier (see getInventoryWarehouses)"),
-          warehouse_type: z
-            .string()
-            .describe("Warehouse type (see getInventoryWarehouses)"),
+          warehouse_id: z.number().describe("Warehouse identifier (see getInventoryWarehouses)"),
+          warehouse_type: z.string().describe("Warehouse type (see getInventoryWarehouses)"),
           location_id: z.number().describe("ID of the location to delete"),
         })
         .passthrough(),
@@ -385,8 +361,7 @@ export const inventoryCategory: CategoryDef = {
     },
     {
       name: "addInventoryWarehouseZone",
-      description:
-        "Create a new warehouse zone or update an existing one when zone_id is passed.",
+      description: "Create a new warehouse zone or update an existing one when zone_id is passed.",
       mode: "write",
       schema: z
         .object({
@@ -416,8 +391,7 @@ export const inventoryCategory: CategoryDef = {
     },
     {
       name: "addInventoryWarehouseRack",
-      description:
-        "Create a new warehouse rack or update an existing one when rack_id is passed.",
+      description: "Create a new warehouse rack or update an existing one when rack_id is passed.",
       mode: "write",
       schema: z
         .object({
@@ -467,9 +441,7 @@ export const inventoryCategory: CategoryDef = {
             .optional()
             .describe("Category identifier to update; omit to create a new category"),
           name: z.string().describe("Category name (max 200 characters)"),
-          parent_id: z
-            .number()
-            .describe("Parent category ID (use 0 for a top-level category)"),
+          parent_id: z.number().describe("Parent category ID (use 0 for a top-level category)"),
         })
         .passthrough(),
     },
@@ -555,8 +527,7 @@ export const inventoryCategory: CategoryDef = {
     },
     {
       name: "addInventorySupplier",
-      description:
-        "Create a new supplier or update an existing one when supplier_id is passed.",
+      description: "Create a new supplier or update an existing one when supplier_id is passed.",
       mode: "write",
       schema: z
         .object({
@@ -565,9 +536,7 @@ export const inventoryCategory: CategoryDef = {
             .optional()
             .describe("Supplier identifier; pass to update, omit to create"),
           name: z.string().describe("Supplier name (max 40 characters)"),
-          take_product_cost_from: z
-            .string()
-            .describe('Cost source: "cost" or a price group ID'),
+          take_product_cost_from: z.string().describe('Cost source: "cost" or a price group ID'),
           take_product_code_from: z
             .string()
             .describe('Code source: "sku", "ean", "code" or an extra field ID'),
@@ -593,17 +562,13 @@ export const inventoryCategory: CategoryDef = {
     },
     {
       name: "deleteInventorySupplier",
-      description:
-        "Permanently delete a supplier from BaseLinker storage. This cannot be undone.",
+      description: "Permanently delete a supplier from BaseLinker storage. This cannot be undone.",
       mode: "write",
-      schema: z
-        .object({ supplier_id: z.number().describe("Supplier identifier") })
-        .passthrough(),
+      schema: z.object({ supplier_id: z.number().describe("Supplier identifier") }).passthrough(),
     },
     {
       name: "addInventoryPayer",
-      description:
-        "Create a new payer or update an existing one when payer_id is passed.",
+      description: "Create a new payer or update an existing one when payer_id is passed.",
       mode: "write",
       schema: z
         .object({
@@ -624,17 +589,13 @@ export const inventoryCategory: CategoryDef = {
     },
     {
       name: "deleteInventoryPayer",
-      description:
-        "Permanently delete a payer from BaseLinker storage. This cannot be undone.",
+      description: "Permanently delete a payer from BaseLinker storage. This cannot be undone.",
       mode: "write",
-      schema: z
-        .object({ payer_id: z.number().describe("Payer identifier") })
-        .passthrough(),
+      schema: z.object({ payer_id: z.number().describe("Payer identifier") }).passthrough(),
     },
     {
       name: "addInventoryTag",
-      description:
-        "Create a new catalog tag or update an existing one when tag_id is passed.",
+      description: "Create a new catalog tag or update an existing one when tag_id is passed.",
       mode: "write",
       schema: z
         .object({
@@ -642,9 +603,7 @@ export const inventoryCategory: CategoryDef = {
             .number()
             .optional()
             .describe("Tag identifier to update; omit or 0 to create a new tag"),
-          name: z
-            .string()
-            .describe("Tag name; unique within the account, max 25 characters"),
+          name: z.string().describe("Tag name; unique within the account, max 25 characters"),
         })
         .passthrough(),
     },

@@ -14,10 +14,7 @@ export const crmCategory: CategoryDef = {
       schema: z
         .object({
           page: z.number().optional().describe("Results page number (100 per page, from 1)"),
-          filter_crm_client_id: z
-            .number()
-            .optional()
-            .describe("Filter by exact CRM client ID"),
+          filter_crm_client_id: z.number().optional().describe("Filter by exact CRM client ID"),
           filter_email: z.string().optional().describe("Filter by email (partial match)"),
           filter_phone: z.string().optional().describe("Filter by phone (partial match)"),
           filter_login: z.string().optional().describe("Filter by login (partial match)"),
@@ -114,9 +111,7 @@ export const crmCategory: CategoryDef = {
           custom_extra_fields: z
             .record(z.unknown())
             .optional()
-            .describe(
-              "Custom field key-value pairs (supports files in base64 format)",
-            ),
+            .describe("Custom field key-value pairs (supports files in base64 format)"),
         })
         .passthrough(),
     },

@@ -26,19 +26,14 @@ describe("MCP tools", () => {
     const server = createServer(apiClient, allCategories);
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     mcpClient = new Client({ name: "test-client", version: "1.0.0" });
-    await Promise.all([
-      server.connect(serverTransport),
-      mcpClient.connect(clientTransport),
-    ]);
+    await Promise.all([server.connect(serverTransport), mcpClient.connect(clientTransport)]);
   });
 
   it("listToolsWhenCalledThenReturnsAllCategoryTools", async () => {
     const { tools } = await mcpClient.listTools();
 
     const toolNames = tools.map((tool) => tool.name).sort();
-    expect(toolNames).toEqual(
-      allCategories.map((category) => category.toolName).sort(),
-    );
+    expect(toolNames).toEqual(allCategories.map((category) => category.toolName).sort());
   });
 
   it("callToolGivenValidParametersWhenCalledThenDispatchesToApiMethod", async () => {
@@ -169,10 +164,7 @@ describe("write gating", () => {
     const server = createServer(apiClient, allCategories, options);
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const mcpClient = new Client({ name: "test-client", version: "1.0.0" });
-    await Promise.all([
-      server.connect(serverTransport),
-      mcpClient.connect(clientTransport),
-    ]);
+    await Promise.all([server.connect(serverTransport), mcpClient.connect(clientTransport)]);
     return { mcpClient, fetchFn };
   }
 
@@ -221,5 +213,54 @@ describe("write gating", () => {
     for (const tool of tools) {
       expect(tool.annotations?.readOnlyHint, tool.name).toBe(false);
     }
+  });
+});
+
+describe("MCP tools with local file writes disabled", () => {
+  let fetchFn: ReturnType<typeof vi.fn>;
+  let mcpClient: Client;
+
+  beforeEach(async () => {
+    fetchFn = vi.fn();
+    const apiClient = new BaseLinkerClient({
+      token: "test-token",
+      fetchFn: fetchFn as unknown as typeof fetch,
+      limiter: { acquire: async () => {} },
+    });
+    const server = createServer(apiClient, allCategories, { allowLocalFileWrites: false });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    mcpClient = new Client({ name: "test-client", version: "1.0.0" });
+    await Promise.all([server.connect(serverTransport), mcpClient.connect(clientTransport)]);
+  });
+
+  it("callToolGivenSavePathWhenLocalFileWritesDisabledThenReturnsErrorWithoutCallingApi", async () => {
+    const result = await mcpClient.callTool({
+      name: "baselinker_courier",
+      arguments: {
+        method: "getLabel",
+        parameters: { courier_code: "dpd", package_id: 123, save_to_path: "/tmp/label.pdf" },
+      },
+    });
+
+    expect(result.isError).toBe(true);
+    const text = (result.content as Array<{ type: string; text: string }>)[0].text;
+    expect(text).toContain("save_to_path");
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it("callToolGivenNoSavePathWhenLocalFileWritesDisabledThenReturnsEmbeddedResource", async () => {
+    const base64Pdf = Buffer.from("%PDF-1.4 fake").toString("base64");
+    fetchFn.mockResolvedValue(
+      jsonResponse({ status: "SUCCESS", label: base64Pdf, extension: "pdf" }),
+    );
+
+    const result = await mcpClient.callTool({
+      name: "baselinker_courier",
+      arguments: { method: "getLabel", parameters: { courier_code: "dpd", package_id: 123 } },
+    });
+
+    expect(result.isError).toBeFalsy();
+    const content = result.content as Array<Record<string, unknown>>;
+    expect(content.some((block) => block.type === "resource")).toBe(true);
   });
 });

@@ -67,9 +67,7 @@ export const courierCategory: CategoryDef = {
       mode: "read",
       schema: z
         .object({
-          package_ids: z
-            .array(z.number())
-            .describe("List of parcel IDs (max 100 per request)"),
+          package_ids: z.array(z.number()).describe("List of parcel IDs (max 100 per request)"),
         })
         .passthrough(),
     },
@@ -179,9 +177,7 @@ export const courierCategory: CategoryDef = {
       schema: z
         .object({
           order_id: z.number().describe("Order identifier"),
-          courier_code: z
-            .string()
-            .describe("Courier code (from getCouriersList or a custom name)"),
+          courier_code: z.string().describe("Courier code (from getCouriersList or a custom name)"),
           package_number: z.string().describe("Tracking/consignment number"),
           pickup_date: z.number().describe("Dispatch timestamp (Unix format)"),
           return_shipment: z
@@ -228,9 +224,7 @@ export const courierCategory: CategoryDef = {
       schema: z
         .object({
           courier_code: z.string().describe("Courier provider identifier"),
-          account_id: z
-            .number()
-            .describe("Courier API account ID (see getCourierAccounts)"),
+          account_id: z.number().describe("Courier API account ID (see getCourierAccounts)"),
           package_ids: z
             .array(z.number())
             .optional()
@@ -241,9 +235,7 @@ export const courierCategory: CategoryDef = {
             .describe("Consignment numbers (alternative to package_ids)"),
           fields: z
             .array(z.record(z.unknown()))
-            .describe(
-              "Form fields from getRequestParcelPickupFields as key-value pairs",
-            ),
+            .describe("Form fields from getRequestParcelPickupFields as key-value pairs"),
         })
         .passthrough()
         .refine(

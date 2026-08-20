@@ -35,10 +35,7 @@ export const productsCategory: CategoryDef = {
           filter_stock_to: z.number().optional().describe("Maximum stock"),
           page: z.number().optional().describe("Results page (1-based, 1000 per page)"),
           filter_sort: z.string().optional().describe('Sorting, value "id [ASC|DESC]"'),
-          filter_locations: z
-            .string()
-            .optional()
-            .describe("Filter by warehouse location name"),
+          filter_locations: z.string().optional().describe("Filter by warehouse location name"),
           include_variants: z
             .boolean()
             .optional()
@@ -75,10 +72,7 @@ export const productsCategory: CategoryDef = {
             .boolean()
             .optional()
             .describe("Include marketplace category assignments in text_fields"),
-          include_channels_media: z
-            .boolean()
-            .optional()
-            .describe("Include channel-specific media"),
+          include_channels_media: z.boolean().optional().describe("Include channel-specific media"),
         })
         .passthrough(),
     },
@@ -142,7 +136,9 @@ export const productsCategory: CategoryDef = {
           product_id: z
             .number()
             .optional()
-            .describe("Main product ID; omit to create a new product, provide to update an existing one"),
+            .describe(
+              "Main product ID; omit to create a new product, provide to update an existing one",
+            ),
           parent_id: z.number().optional().describe("Parent product ID for product variants"),
           is_bundle: z.boolean().optional().describe("Whether the product is a bundle"),
           sku: z.string().optional().describe("Product SKU number"),
@@ -159,7 +155,9 @@ export const productsCategory: CategoryDef = {
           tax_rate: z
             .number()
             .optional()
-            .describe("VAT rate 0-100; special values: -1 (exempt), -0.02 (NP), -0.03 (reverse charge)"),
+            .describe(
+              "VAT rate 0-100; special values: -1 (exempt), -0.02 (NP), -0.03 (reverse charge)",
+            ),
           weight: z.number().optional().describe("Weight in kilograms"),
           height: z.number().optional().describe("Product height"),
           width: z.number().optional().describe("Product width"),
@@ -170,10 +168,7 @@ export const productsCategory: CategoryDef = {
             .number()
             .optional()
             .describe("Manufacturer ID (see getInventoryManufacturers)"),
-          category_id: z
-            .number()
-            .optional()
-            .describe("Category ID (must be created beforehand)"),
+          category_id: z.number().optional().describe("Category ID (must be created beforehand)"),
           prices: z
             .record(z.unknown())
             .optional()
@@ -202,10 +197,7 @@ export const productsCategory: CategoryDef = {
             .record(z.unknown())
             .optional()
             .describe("Channel-specific media resolution options (0/1/2 values)"),
-          links: z
-            .record(z.unknown())
-            .optional()
-            .describe("External warehouse product links"),
+          links: z.record(z.unknown()).optional().describe("External warehouse product links"),
           bundle_products: z
             .record(z.unknown())
             .optional()

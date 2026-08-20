@@ -17,10 +17,7 @@ export const invoicesCategory: CategoryDef = {
         .object({
           invoice_id: z.number().optional().describe("Retrieve a single specific invoice"),
           order_id: z.number().optional().describe("Invoice associated with a particular order"),
-          date_from: z
-            .number()
-            .optional()
-            .describe("Unix timestamp to collect invoices from"),
+          date_from: z.number().optional().describe("Unix timestamp to collect invoices from"),
           id_from: z
             .number()
             .optional()
@@ -61,8 +58,7 @@ export const invoicesCategory: CategoryDef = {
     },
     {
       name: "getReceipt",
-      description:
-        "Retrieve a single receipt. Provide receipt_id or order_id (at least one).",
+      description: "Retrieve a single receipt. Provide receipt_id or order_id (at least one).",
       mode: "read",
       schema: z
         .object({
@@ -70,10 +66,9 @@ export const invoicesCategory: CategoryDef = {
           order_id: z.number().optional().describe("Order identifier"),
         })
         .passthrough()
-        .refine(
-          (params) => params.receipt_id !== undefined || params.order_id !== undefined,
-          { message: "Provide receipt_id or order_id" },
-        ),
+        .refine((params) => params.receipt_id !== undefined || params.order_id !== undefined, {
+          message: "Provide receipt_id or order_id",
+        }),
     },
     {
       name: "getReceipts",
@@ -116,7 +111,9 @@ export const invoicesCategory: CategoryDef = {
           return_order_id: z
             .number()
             .optional()
-            .describe("Return order identifier (alternative source instead of original_invoice_id)"),
+            .describe(
+              "Return order identifier (alternative source instead of original_invoice_id)",
+            ),
           series_id: z.number().optional().describe("Series numbering identifier"),
           date_sell: z.number().optional().describe("Sell date as a Unix timestamp"),
           correcting_reason: z
@@ -125,14 +122,8 @@ export const invoicesCategory: CategoryDef = {
             .describe(
               "Correction reason code 1-9 (e.g. prepayments return, discounts, price increase, refunds, returns, pricing errors, address correction, contract withdrawal, other)",
             ),
-          correcting_items: z
-            .boolean()
-            .optional()
-            .describe("Whether to correct invoice items"),
-          correcting_data: z
-            .boolean()
-            .optional()
-            .describe("Whether to correct invoice data"),
+          correcting_items: z.boolean().optional().describe("Whether to correct invoice items"),
+          correcting_data: z.boolean().optional().describe("Whether to correct invoice data"),
           invoice_fullname: z.string().optional().describe("Full name for the invoice"),
           invoice_company: z.string().optional().describe("Company name"),
           invoice_address: z.string().optional().describe("Address"),
@@ -141,10 +132,7 @@ export const invoicesCategory: CategoryDef = {
           invoice_state: z.string().optional().describe("State/province"),
           invoice_country_code: z.string().optional().describe("Country code (e.g. PL)"),
           invoice_nip: z.string().optional().describe("Tax ID number"),
-          items: z
-            .array(z.record(z.unknown()))
-            .optional()
-            .describe("Array of items to correct"),
+          items: z.array(z.record(z.unknown())).optional().describe("Array of items to correct"),
           fv_payment: z.string().optional().describe("Payment method"),
           fv_person: z.string().optional().describe("Issuer name"),
         })
@@ -158,15 +146,13 @@ export const invoicesCategory: CategoryDef = {
       schema: z
         .object({
           invoice_id: z.number().describe("BaseLinker invoice identifier"),
-          file: z
-            .string()
-            .describe(
-              "PDF or XML file encoded in base64, prefixed with 'data:'",
-            ),
+          file: z.string().describe("PDF or XML file encoded in base64, prefixed with 'data:'"),
           external_invoice_number: z
             .string()
             .optional()
-            .describe("Invoice number from the external system that overwrites the BaseLinker invoice number"),
+            .describe(
+              "Invoice number from the external system that overwrites the BaseLinker invoice number",
+            ),
         })
         .passthrough(),
     },
@@ -180,7 +166,9 @@ export const invoicesCategory: CategoryDef = {
           series_id: z
             .number()
             .optional()
-            .describe("Receipt numbering series identifier; the default receipt series is used when omitted"),
+            .describe(
+              "Receipt numbering series identifier; the default receipt series is used when omitted",
+            ),
         })
         .passthrough(),
     },
@@ -192,15 +180,13 @@ export const invoicesCategory: CategoryDef = {
       schema: z
         .object({
           receipt_id: z.number().describe("BaseLinker receipt identifier"),
-          file: z
-            .string()
-            .describe(
-              "Receipt PDF file encoded in base64, prefixed with 'data:'",
-            ),
+          file: z.string().describe("Receipt PDF file encoded in base64, prefixed with 'data:'"),
           external_receipt_number: z
             .string()
             .optional()
-            .describe("External system receipt number that overwrites the BaseLinker receipt number"),
+            .describe(
+              "External system receipt number that overwrites the BaseLinker receipt number",
+            ),
         })
         .passthrough(),
     },
@@ -214,11 +200,11 @@ export const invoicesCategory: CategoryDef = {
           receipt_id: z.number().describe("Receipt ID obtained from the getNewReceipts method"),
           receipt_nr: z
             .string()
-            .describe("Number of the issued receipt (can be blank if the printer does not provide one)"),
+            .describe(
+              "Number of the issued receipt (can be blank if the printer does not provide one)",
+            ),
           date: z.number().describe("Receipt printing date as a Unix timestamp"),
-          printer_error: z
-            .boolean()
-            .describe("Whether receipt printing encountered an error"),
+          printer_error: z.boolean().describe("Whether receipt printing encountered an error"),
           printer_name: z.string().optional().describe("Name of the printer used"),
         })
         .passthrough(),
