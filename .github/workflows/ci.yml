@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["20", "22", "24"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm test
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm audit --audit-level=high
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t baselinker-mcp:ci .
+      - name: Start the HTTP transport and probe it
+        run: |
+          docker run -d --name probe -p 8000:8000 \
+            -e BASELINKER_API_TOKEN=dummy \
+            -e BASELINKER_MCP_AUTH_REALM_URL=https://keycloak.example.com/realms/myrealm \
+            -e BASELINKER_MCP_AUTH_BASE_URL=https://mcp.example.com \
+            baselinker-mcp:ci
+          for _ in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8000/healthz >/dev/null && break
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:8000/healthz
+          curl -sf http://127.0.0.1:8000/.well-known/oauth-protected-resource/mcp
+          status=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:8000/mcp \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json, text/event-stream' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}')
+          test "$status" = "401" || { echo "expected 401 without a token, got $status"; exit 1; }
+      - if: always()
+        run: docker logs probe || true

@@ -1,0 +1,72 @@
+# Reference deployment: baselinker-mcp behind Traefik, authenticated by Keycloak.
+#
+# Replace every occurrence of mcp.example.com and keycloak.example.com/realms/myrealm
+# with your own hostnames, then:
+#
+#   cp .env.example .env    # paste your BaseLinker token
+#   chmod 600 .env
+#   docker compose up -d
+#
+# The image is built straight from a pinned git tag, so nothing needs to be copied
+# to the server. Bump the ref in build.context and the tag in image: to upgrade.
+services:
+  baselinker-mcp:
+    build:
+      context: https://github.com/PiotrRaszkowski/baselinker-mcp.git#v0.2.0
+    image: baselinker-mcp:0.2.0
+    container_name: baselinker-mcp
+    restart: unless-stopped
+    command: ["--transport", "http", "--host", "0.0.0.0", "--port", "8000", "--path", "/mcp"]
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    networks:
+      - traefik-proxy
+    # Deliberately no `ports:` — the container is reachable only through the proxy network.
+    environment:
+      - HOME=/tmp
+      # One shared BaseLinker token: every user who authenticates against the realm
+      # operates on the same BaseLinker account. Keep it in .env next to this file.
+      - BASELINKER_API_TOKEN=${BASELINKER_API_TOKEN}
+      # Writes let the server modify orders, stock, prices, invoices and dispatch real
+      # courier shipments. Drop this line to run the endpoint read-only.
+      - BASELINKER_ALLOW_WRITES=true
+      # OAuth. Clients register themselves through DCR, so no client ID or secret here.
+      - BASELINKER_MCP_AUTH_REALM_URL=https://keycloak.example.com/realms/myrealm
+      - BASELINKER_MCP_AUTH_BASE_URL=https://mcp.example.com
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8000/healthz"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      # HTTP -> HTTPS redirect. No allowlist here — the ACME HTTP-01 challenge uses it.
+      - "traefik.http.routers.baselinker-mcp.entrypoints=http"
+      - "traefik.http.routers.baselinker-mcp.rule=Host(`mcp.example.com`)"
+      - "traefik.http.middlewares.baselinker-mcp-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.baselinker-mcp.middlewares=baselinker-mcp-https-redirect"
+      - "traefik.http.routers.baselinker-mcp-secure.entrypoints=https"
+      - "traefik.http.routers.baselinker-mcp-secure.rule=Host(`mcp.example.com`)"
+      - "traefik.http.routers.baselinker-mcp-secure.tls=true"
+      - "traefik.http.routers.baselinker-mcp-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.baselinker-mcp-secure.service=baselinker-mcp"
+      # Optional second layer: restrict source IPs to your MCP client's egress range.
+      # Define the middleware in your Traefik file provider, then uncomment:
+      # - "traefik.http.routers.baselinker-mcp-secure.middlewares=client-ip-allowlist@file"
+      - "traefik.http.services.baselinker-mcp.loadbalancer.server.port=8000"
+      - "traefik.docker.network=traefik-proxy"
+
+networks:
+  traefik-proxy:
+    name: traefik-proxy
+    external: true
